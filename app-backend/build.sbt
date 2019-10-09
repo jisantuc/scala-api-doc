@@ -27,8 +27,6 @@ lazy val commonSettings = Seq(
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
-  .aggregate(api, datamodel)
-lazy val rootRef = LocalProject("root")
 
 ///////////////
 // Datamodel //
@@ -74,7 +72,7 @@ lazy val apiDependencies = commonDependencies ++ Seq(
 )
 
 lazy val api = (project in file("api"))
-  .dependsOn(rootRef, datamodel)
+  .dependsOn(datamodel)
   .settings(apiSettings: _*)
   .settings({
     libraryDependencies ++= apiDependencies

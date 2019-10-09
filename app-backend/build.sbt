@@ -68,6 +68,8 @@ lazy val apiDependencies = commonDependencies ++ Seq(
   Dependencies.http4s,
   Dependencies.http4sCirce,
   Dependencies.http4sDsl,
+  Dependencies.http4sRhoCore,
+  Dependencies.http4sRhoSwagger,
   Dependencies.http4sServer
 )
 

@@ -19,10 +19,20 @@ import scala.language.higherKinds
 object HelloRouter {
 
   val greetEndpoint: Endpoint[String, Unit, Json, Nothing] =
-    endpoint.get.in("greet").in(path[String]).out(jsonBody[Json]).description("Greet someone")
+    endpoint.get
+      .in("greet")
+      .in(path[String])
+      .out(jsonBody[Json])
+      .description("Greet someone")
+      .name("greet")
 
   val fooEndpoint: Endpoint[Foo, Unit, Foo, Nothing] =
-    endpoint.post.in("foo").in(jsonBody[Foo]).out(jsonBody[Foo]).description("Echo a Foo")
+    endpoint.post
+      .in("foo")
+      .in(jsonBody[Foo])
+      .out(jsonBody[Foo])
+      .description("Echo a Foo")
+      .name("echo")
 
   val endpoints = List(greetEndpoint, fooEndpoint)
 

@@ -14,13 +14,15 @@ import tapir.openapi.circe.yaml._
 import tapir.docs.openapi._
 import tapir.swagger.http4s.SwaggerHttp4s
 
-object Router {
+import scala.language.higherKinds
+
+object HelloRouter {
 
   val greetEndpoint: Endpoint[String, Unit, Json, Nothing] =
-    endpoint.get.in("greet").in(path[String]).out(jsonBody[Json])
+    endpoint.get.in("greet").in(path[String]).out(jsonBody[Json]).description("Greet someone")
 
   val fooEndpoint: Endpoint[Foo, Unit, Foo, Nothing] =
-    endpoint.post.in("foo").in(jsonBody[Foo]).out(jsonBody[Foo])
+    endpoint.post.in("foo").in(jsonBody[Foo]).out(jsonBody[Foo]).description("Echo a Foo")
 
   val endpoints = List(greetEndpoint, fooEndpoint)
 
@@ -28,9 +30,9 @@ object Router {
 
 class HelloService(implicit val contextShift: ContextShift[IO]) {
 
-  def greetRoute: HttpRoutes[IO] = Router.greetEndpoint.toRoutes(greet _)
-  def fooRoute: HttpRoutes[IO]   = Router.fooEndpoint.toRoutes(foo _)
-  val doc: OpenAPI               = Router.endpoints.toOpenAPI("Hello Service", "1.0")
+  def greetRoute: HttpRoutes[IO] = HelloRouter.greetEndpoint.toRoutes(greet _)
+  def fooRoute: HttpRoutes[IO]   = HelloRouter.fooEndpoint.toRoutes(foo _)
+  val doc: OpenAPI               = HelloRouter.endpoints.toOpenAPI("Hello Service", "1.0")
   def docRoutes: HttpRoutes[IO]  = new SwaggerHttp4s(doc.toYaml).routes
 
   def greet(name: String): IO[Either[Unit, Json]] =

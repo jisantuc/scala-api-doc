@@ -12,7 +12,7 @@ object ApiServer extends IOApp {
 
   val httpApp: HttpApp[IO] = CORS(
     Router(
-      "/api/hello" -> HelloService.routes
+      "/api/hello" -> (new HelloService).routes,
     )).orNotFound
 
   def run(args: List[String]): IO[ExitCode] =

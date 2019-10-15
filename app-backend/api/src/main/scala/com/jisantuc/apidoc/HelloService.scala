@@ -34,16 +34,28 @@ object HelloRouter {
       .description("Echo a Foo")
       .name("echo")
 
-  val endpoints = List(greetEndpoint, fooEndpoint)
+  val authedEndpoint: Endpoint[String, Unit, String, Nothing] =
+    endpoint.get
+      .in(auth.bearer)
+      .in("safe")
+      .out(stringBody)
+
+  val endpoints = List(greetEndpoint, fooEndpoint, authedEndpoint)
 
 }
 
 class HelloService(implicit val contextShift: ContextShift[IO]) {
 
-  def greetRoute: HttpRoutes[IO] = HelloRouter.greetEndpoint.toRoutes(greet _)
-  def fooRoute: HttpRoutes[IO]   = HelloRouter.fooEndpoint.toRoutes(foo _)
-  val doc: OpenAPI               = HelloRouter.endpoints.toOpenAPI("Hello Service", "1.0")
-  def docRoutes: HttpRoutes[IO]  = new SwaggerHttp4s(doc.toYaml).routes
+  def greetRoute: HttpRoutes[IO]  = HelloRouter.greetEndpoint.toRoutes(greet _)
+  def fooRoute: HttpRoutes[IO]    = HelloRouter.fooEndpoint.toRoutes(foo _)
+  def authedRoute: HttpRoutes[IO] = HelloRouter.authedEndpoint.toRoutes(authorized _)
+  val doc: OpenAPI                = HelloRouter.endpoints.toOpenAPI("Hello Service", "1.0")
+  def docRoutes: HttpRoutes[IO]   = new SwaggerHttp4s(doc.toYaml).routes
+
+  def authorized(token: String): IO[Either[Unit, String]] = {
+    println(s"Token is: $token")
+    if (token == "goodtoken") IO.pure(Right(token)) else IO.pure(Left(()))
+  }
 
   def greet(name: String): IO[Either[Unit, Json]] =
     IO.pure { Right(Json.obj("message" -> Json.fromString(s"Hello, ${name}"))) }
@@ -52,5 +64,5 @@ class HelloService(implicit val contextShift: ContextShift[IO]) {
     IO.pure { Right(foo) }
 
   val routes: HttpRoutes[IO] =
-    greetRoute <+> fooRoute <+> docRoutes
+    greetRoute <+> fooRoute <+> authedRoute <+> docRoutes
 }
